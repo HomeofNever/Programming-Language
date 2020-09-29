@@ -69,10 +69,17 @@ transform([A|B], [C|R]) :- isTerm(A, C), transform(B, R).
 % the production sequence the predictive parser applies.
 % E.g., transform([3,-,5],R),parseLL(R,ProdSeq).
 % ProdSeq = [0, 1, 4, 6, 2, 4, 6, 3].
-parseLL([I|R], [P|ProdSeq]) :- predict(N, I, P), parseLL(R, ProdSeq).
-parseLL([term(end, _)], _).
+parseLL(R, ProdSeq) :- parse([non(s,_)], R, ProdSeq).
 
-parse(A, B, P) :- prod(0,[non(s,_),non(e,_)]).
+parse([F|R], E, [S|ProdSeq]) :- 
+    [A|_] = E, predict(F, A, P), prod(P, [_|RHS]), append(RHS, R, N), parse(N, E, ProdSeq), S = P, !.
+parse([F|R], [N|E], P) :- 
+    F = N, parse(R, E, P).
+parse([term(num,_)|R], [term(num,_)|E], P) :- 
+    parse(R, E, P).
+parse([term(eps,_)|R], E, P) :- 
+    parse(R, E, P). 
+parse(_, [term(end,_)], _).
 
 % parseAndSolve
 % =============
