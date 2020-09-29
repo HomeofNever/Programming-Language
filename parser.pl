@@ -79,7 +79,7 @@ parse([term(num,_)|R], [term(num,_)|E], P) :-
     parse(R, E, P).
 parse([term(eps,_)|R], E, P) :- 
     parse(R, E, P). 
-parse(_, [term(end,_)], _).
+parse(_, [term(end,_)], []).
 
 % parseAndSolve
 % =============
@@ -88,3 +88,33 @@ parse(_, [term(end,_)], _).
 % E.g., transform([3,-,5],R),parseAndSolve(R,ProdSeq,V).
 % ProdSeq = [0, 1, 4, 6, 2, 4, 6, 3],
 % V = -2.
+parseAndSolve(R, ProdSeq, V) :- parseLL(R, ProdSeq), solve(R, ProdSeq, V).
+
+% Attributes
+attribute(0,[non(s,Vs),non(e,Ve)]) :- Vs = Ve.
+attribute(1,[non(e,Ve),non(t,Vt),non(tt,Vtt)]) :- Ve is Vt - Vtt. 
+attribute(2,[non(tt,Vtto),term(minus,_),non(t,Vt),non(tt,Vtt)]) :- Vtto is Vt + Vtt.
+attribute(3,[non(tt,Vtt),term(eps,_)]) :- Vtt is 0.
+attribute(4,[non(t,Vt),term(num,Num),non(ft,Ft)]) :- Vt is Num * Ft.
+attribute(5,[non(ft,Vfto),term(times,_),term(num,Num),non(ft,_)]) :- Vfto is Num.
+attribute(6,[non(ft,Vft),term(eps,_)]) :- Vft is 1.
+
+% Set each of the terms 
+applyTerm([term(X,Y)|R], [term(X,Y)|E], P) :- applyTerm(R, E, P).
+applyTerm(R, [term(_,Y)|E], P) :- [term(T,_)|_] = R, not(T = Y), applyTerm(R, E, P).
+applyTerm(R, [X|E], P) :- [F|_] = R, not(F = X), applyTerm(R, E, P).
+applyTerm(R, [], P) :- P = R.
+
+% Connects non-terminals between recursions
+applyNon([non(X,Y)|R], [non(X,Y)|E], P) :- applyNon(R, E, P).
+applyNon(R, [_|E], P) :- applyNon(R, E, P).
+applyNon(R, [], P) :- P = R, !.
+
+solve(R, ProdSeq, V) :- solveLL(R, ProdSeq, X), [non(_, V)|_] = X.
+ 
+% Entry
+solveLL(R, [N|ProdSeq], V) :- 
+    prod(N, X), applyTerm(R, X, NR), solveLL(NR, ProdSeq, Next), applyNon(Next, X, NextRes), attribute(N, X), [A|_] = X, append([A], NextRes, V), !.
+solveLL(_, [], []).
+
+
