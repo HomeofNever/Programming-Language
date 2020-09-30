@@ -1,2 +1,3 @@
-left([A|P]) :- [X|B] = A, left([B|P]).
-solve(P) :- left([[0, 0, 0]|P]).
+keepNon([term(_, _)|N], X) :- keepNon(N, X).
+keepNon([non(X, Y)|N], [non(X, Y)|R]) :- keepNon(N, R).
+keepNon([], _).

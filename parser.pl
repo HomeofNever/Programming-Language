@@ -56,9 +56,9 @@ input1([3,-,5,*,7,-,18]).
 % list will be computed in unbound variable R.
 % E.g., transform([3,-,5],R).
 % R = [term(num,3),term(minus,_),term(num,5),term(end,_)]
-isTerm(-, R) :- R = term(minus, _), !.
-isTerm(*, R) :- R = term(times, _), !.
-isTerm(X, R) :- R = term(num, X).
+isTerm(-, R) :- R = term(minus, _).
+isTerm(*, R) :- R = term(times, _).
+isTerm(X, R) :- number(X), R = term(num, X).
 transform([], E) :- E = [term(end, _)].
 transform([A|B], [C|R]) :- isTerm(A, C), transform(B, R).
 
@@ -72,14 +72,14 @@ transform([A|B], [C|R]) :- isTerm(A, C), transform(B, R).
 parseLL(R, ProdSeq) :- parse([non(s,_)], R, ProdSeq).
 
 parse([F|R], E, [S|ProdSeq]) :- 
-    [A|_] = E, predict(F, A, P), prod(P, [_|RHS]), append(RHS, R, N), parse(N, E, ProdSeq), S = P, !.
+    [A|_] = E, predict(F, A, P), prod(P, [_|RHS]), append(RHS, R, N), parse(N, E, ProdSeq), S = P.
 parse([F|R], [N|E], P) :- 
-    F = N, parse(R, E, P).
+    F = N, parse(R, E, P), !.
 parse([term(num,_)|R], [term(num,_)|E], P) :- 
     parse(R, E, P).
 parse([term(eps,_)|R], E, P) :- 
     parse(R, E, P). 
-parse(_, [term(end,_)], []).
+parse([], [term(end,_)], []).
 
 % parseAndSolve
 % =============
@@ -96,7 +96,7 @@ attribute(1,[non(e,Ve),non(t,Vt),non(tt,Vtt)]) :- Ve is Vt - Vtt.
 attribute(2,[non(tt,Vtto),term(minus,_),non(t,Vt),non(tt,Vtt)]) :- Vtto is Vt + Vtt.
 attribute(3,[non(tt,Vtt),term(eps,_)]) :- Vtt is 0.
 attribute(4,[non(t,Vt),term(num,Num),non(ft,Ft)]) :- Vt is Num * Ft.
-attribute(5,[non(ft,Vfto),term(times,_),term(num,Num),non(ft,_)]) :- Vfto is Num.
+attribute(5,[non(ft,Vfto),term(times,_),term(num,Num),non(ft,Vft)]) :- Vfto is Num * Vft.
 attribute(6,[non(ft,Vft),term(eps,_)]) :- Vft is 1.
 
 % Set each of the terms 
@@ -106,15 +106,23 @@ applyTerm(R, [X|E], P) :- [F|_] = R, not(F = X), applyTerm(R, E, P).
 applyTerm(R, [], P) :- P = R.
 
 % Connects non-terminals between recursions
-applyNon([non(X,Y)|R], [non(X,Y)|E], P) :- applyNon(R, E, P).
-applyNon(R, [_|E], P) :- applyNon(R, E, P).
-applyNon(R, [], P) :- P = R, !.
+keepNon([term(_, _)|N], X) :- keepNon(N, X).
+keepNon([non(X, Y)|N], [non(X, Y)|R]) :- keepNon(N, R).
+keepNon([], _).
 
 solve(R, ProdSeq, V) :- solveLL(R, ProdSeq, X), [non(_, V)|_] = X.
- 
+
 % Entry
 solveLL(R, [N|ProdSeq], V) :- 
-    prod(N, X), applyTerm(R, X, NR), solveLL(NR, ProdSeq, Next), applyNon(Next, X, NextRes), attribute(N, X), [A|_] = X, append([A], NextRes, V), !.
+    prod(N, AllTerm),
+    applyTerm(R, AllTerm, NR),
+    keepNon(AllTerm, AllNonTerm),
+    [Bind|RestNonTerm] = V,
+    [Bind|_] = AllTerm,
+    [_|NewNonTerm] = AllNonTerm,
+    append(NewNonTerm, RestNonTerm, Next),
+    solveLL(NR, ProdSeq, Next), 
+    attribute(N, AllTerm), !.
 solveLL(_, [], []).
 
 
