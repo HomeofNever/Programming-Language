@@ -71,14 +71,17 @@ transform([A|B], [C|R]) :- isTerm(A, C), transform(B, R).
 % ProdSeq = [0, 1, 4, 6, 2, 4, 6, 3].
 parseLL(R, ProdSeq) :- parse([non(s,_)], R, ProdSeq).
 
+% pop the first non-terminal from stack, 
+% get prediction and attach the prod to the top of the stack.
 parse([F|R], E, [S|ProdSeq]) :- 
-    [A|_] = E, predict(F, A, P), prod(P, [_|RHS]), append(RHS, R, N), parse(N, E, ProdSeq), S = P.
-parse([F|R], [N|E], P) :- 
-    F = N, parse(R, E, P), !.
-parse([term(num,_)|R], [term(num,_)|E], P) :- 
-    parse(R, E, P).
-parse([term(eps,_)|R], E, P) :- 
-    parse(R, E, P). 
+    [A|_] = E, predict(F, A, P), 
+    prod(P, [_|RHS]), 
+    append(RHS, R, N), 
+    parse(N, E, ProdSeq), 
+    S = P.
+parse([term(X, _)|R], [term(X, _)|E], P) :- parse(R, E, P).
+% Skip empty
+parse([term(eps,_)|R], E, P) :- parse(R, E, P). 
 parse([], [term(end,_)], []).
 
 % parseAndSolve
@@ -105,7 +108,7 @@ applyTerm(R, [term(_,Y)|E], P) :- [term(T,_)|_] = R, not(T = Y), applyTerm(R, E,
 applyTerm(R, [X|E], P) :- [F|_] = R, not(F = X), applyTerm(R, E, P).
 applyTerm(R, [], P) :- P = R.
 
-% Connects non-terminals between recursions
+% Remove terminals between recursions
 keepNon([term(_, _)|N], X) :- keepNon(N, X).
 keepNon([non(X, Y)|N], [non(X, Y)|R]) :- keepNon(N, R).
 keepNon([], _).
@@ -113,11 +116,14 @@ keepNon([], _).
 solve(R, ProdSeq, V) :- solveLL(R, ProdSeq, X), [non(_, V)|_] = X.
 
 % Entry
+% There are two version: one tries to bind the result after recurion,
+% or, bind them before (unify) recursion. We choose latter one here,
+% git: main@e0bec008 has the after recursion version.
 solveLL(R, [N|ProdSeq], V) :- 
     prod(N, AllTerm),
     applyTerm(R, AllTerm, NR),
     keepNon(AllTerm, AllNonTerm),
-    [Bind|RestNonTerm] = V,
+    [Bind|RestNonTerm] = V, % Bind the non-term with the first one on stack
     [Bind|_] = AllTerm,
     [_|NewNonTerm] = AllNonTerm,
     append(NewNonTerm, RestNonTerm, Next),
