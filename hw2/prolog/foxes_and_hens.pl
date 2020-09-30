@@ -14,7 +14,7 @@ isValid(LF, LH) :- shouldLargerThan0(LF, LH), isValidLeft(LF, LH), isValidRight(
 % Change boot side and number
 transport(0, Num, R, NB) :- R is Num * -1, NB = 1.
 transport(1, Num, R, NB) :- R is Num * 1, NB = 0.
-% Move 2 animal
+% Move 2 animals
 move([LF, LH, LB],[NF, NH, NB]) :- 
     transport(LB, 1, R, NB), NF is LF - R, NH is LH - R, isValid(NF, NH).
 move([LF, LH, LB], [NF, NH, NB]) :- 
