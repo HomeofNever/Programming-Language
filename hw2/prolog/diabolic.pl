@@ -1,6 +1,7 @@
 write_all() :- allDiabolic.
 diabolic(L) :- solveDiabolic(L, [[1, 8, 10, 15, 14, 11, 5, 4, 7, 2, 16, 9, 12, 13, 3, 6]], []).
 
+% Five variant
 diabolicReflection(
     [
         A, B, C, D, 
@@ -67,6 +68,9 @@ diabolicComplexConvolution(
      ]
 ).
 
+% For all combination, check if it is already existed in the list
+% If not, push to list and all its variants to the stack.
+% List should contains all possible combinations, each occur only once.
 solveDiabolic(L, [S|Stack], All) :- 
     not(member(S, All)), 
     diabolicReflection(S, A), diabolicRotationAboutCenter(S, B), diabolicRotateofColumn(S, C), diabolicRotateofRow(S, D), diabolicComplexConvolution(S, E), 
