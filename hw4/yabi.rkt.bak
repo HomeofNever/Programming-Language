@@ -1,0 +1,13 @@
+;; YOUR CODE HERE
+(define (myinterpreter x)
+;;
+#t
+)
+
+(myinterpreter '(
+    (prog true)
+    (prog (myor (myand true (myignore (myor true false))) (myand true false)))
+    (prog (mylet z (myor false true) (myand z true)))
+    (prog (mylet a true (myor (mylet b (myand true false) (myor false b)) (myand false a))))
+    (prog (mylet x true (myor (mylet x (myand true false) (myand true x)) (myand true x))))
+))

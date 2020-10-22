@@ -1,0 +1,18 @@
+(define (mystart expr)
+  ( cond
+     [(boolean? expr) expr]
+     [(equal? (car expr) 'prog) (mystart (cdr expr))]
+     [(equal? (car expr) 'myignore) #f]
+     [(equal? (car expr) 'myand) (and
+                                  (mystart (caar expr))
+                                  (mystart (cdar expr))
+                                 )]
+     [(equal? (car expr) 'myor) (or
+                                  (mystart (caar expr))
+                                  (mystart (cdar expr))
+                                 )]
+     [(equal? (car expr) 'mynot) (not mystart(cdr expr))]
+     [(equal? (car expr) 'mylet) #t]
+     [else (error "unable to parse")]
+  )
+)
