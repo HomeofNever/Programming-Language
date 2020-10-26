@@ -1,0 +1,18 @@
+(define (isNonDecreasing? ls prev)
+  (cond
+    ((null? ls) #t)
+    ((null? prev) (isNonDecreasing? (cdr ls) (car ls)))
+    ((>= (car ls) prev) (isNonDecreasing? (cdr ls) (car ls)))
+    (else #f)
+    )
+  )
+
+
+(define (lis ls)
+  ()
+)
+
+
+
+(define list1 '(1 2 3 2 4 1 2))
+(define list2 '(2 4 3 1 2 1))
