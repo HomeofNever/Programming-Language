@@ -64,15 +64,69 @@
   )
 
 ;; Starter
-(define (lis ls)
-  (lisRecursive ls (length ls))
-)
+(define (lis_slow ls)
+  (if
+   (null? ls)
+   '()
+   (lisRecursive ls (length ls))
+   )
+  )
+
+;; n^2 solution
+(define (lis_fast_find_all originL index currentL)
+  (if (< index (length originL))
+      (if (null? currentL)
+          (lis_fast_find_all originL (+ index 1) (cons (list-ref originL index) '()))
+          (let* (
+                (prev (car (reverse currentL)))
+                (next (list-ref originL index))
+                (nextIndex (+ index 1))
+                )
+            (if (<= prev next)
+                (let (
+                      (accept (lis_fast_find_all originL nextIndex (append currentL (cons next '()))))
+                      (drop (lis_fast_find_all originL nextIndex currentL))
+                      )
+                (lis_fast_find_all originL nextIndex currentL)
+                )
+            )
+          )
+      currentL
+      )
+  )
+                
+         
+  
+
+(define (lis_fast_recursive originL index currentL)
+  (if (< index (length originL))
+      (let (
+            (calculatedLS (lis_fast_find_all originL index '()))
+            )
+        (if (< (length currentL) (length calculatedLS))
+            (lis_fast_recursive originL (+ index 1) calculatedLS)
+            (lis_fast_recursive originL (+ index 1) currentL)
+            )
+        )
+      currentL)
+  )
+        
+ 
+          
+(define (lis_fast ls)
+  (if (null? ls) '()
+      (lis_fast_recursive ls 0 '())
+      )
+  )
+  
 
 
 ;; Test Case
-(define list1 '(1 2 3 2 4 1 2))
-(define list2 '(2 4 3 1 2 1))
-(lis list1)
-;(lis list2)
+;(define list1 '(1 2 3 2 4 1 2))
+;(define list2 '(2 4 3 1 2 1))
+;(lis_slow list1)
+;(lis_slow list2)
+;(lis_fast list1)
+;(lis_fast list2)
 ;(subListRecursive list1 0 7)
 ;(firstNonDecreasing '((1 2 3 2 4 1 2)))
