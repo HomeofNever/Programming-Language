@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+   <title>Comments</title>
+</head>
+<body>
+<div id="header">
+<div class="course">CSCI 4430 Programming Languages</div>
+<h2><!-- omit from toc -->
+<span class="head">Writing Comments</span>
+</h2>
+<!--
+<span class="title">Scheme Part 1</span>
+</h1>
+-->
+<!--
+<h2>
+<span class="head">Due:</span>
+<span class="due">Tuesday October 23 @ 1:59pm</span>
+</h2>
+-->
+</div>
+
+<p>
+For this assignment, we require that you write comments in the style outlined below. 
+It follows "How to design programs", a textbook by the developers of DrScheme/DrRacket. 
+There are 4 required sections: Contract, Purpose, Example, and Definition,  
+as in the example comment for function <tt>area-of-ring</tt>:
+</p>
+
+<p>
+<pre>
+;; Contract: area-of-ring : number * number -> number
+;; Purpose: to compute the area of a ring whose radius is
+;; outer and whose hole has a radius of inner
+;; Example: (area-of-ring 5 3) should produce 50.24
+;; Definition:
+(define (area-of-ring outer inner)
+  (- (area-of-disk outer)
+     (area-of-disk inner)))
+</pre>
+</p>
+
+<p>
+The goal of designing a function is to create a mechanism that consumes and produces data. 
+Therefore, every function has a meaningful name and a statement of what kind of information 
+it consumes and produces. This is called a CONTRACT and is, essentially, an unchecked type
+signature of the function. The contract for <tt>area-of-ring</tt> is:
+</p>
+
+<p><tt>;; Contract: area-of-ring : number * number -> number</tt><br></p>
+
+<p>
+Semicolons indicate that the line is a Scheme comment. The contract consists of two parts.
+The first, to the left of the colon, states the function's name. The second, to the right 
+of the colon, specifies what kind of data the function consumes and what it produces; 
+the inputs are separated from the output by an arrow.
+</p>
+
+<p>
+In addition, every function has a short PURPOSE statement, that briefly describes 
+what the function computes. For most functions, one or two lines will suffice. The purpose 
+statement for our running example <tt>area-of-ring</tt> is:
+</p>
+
+<p>
+<tt>;; Purpose: to compute the area of a ring whose radius is</tt><br>
+<tt>;; outer and whose hole has a radius of inner</tt><br>
+</p>
+
+<p>The EXAMPLE section shows a call and the expected return result, 
+and the DEFINITION section contains the actual Scheme code for the funtion:
+</p>
+
+<p>
+<pre>
+;; Example: (area-of-ring 5 3) should produce 50.24
+;; Definition:
+(define (area-of-ring outer inner)
+  (- (area-of-disk outer)
+     (area-of-disk inner)))
+</pre>
+</p>
+
+
+<h2>Additional Examples</h2>
+
+<p>Function <tt>map</tt> (a higher-order polymorphic function):</p>
+
+<p>
+<pre>
+;; Contract: map : (a -> b) * (list a) -> (list b)
+;; Purpose: to apply function f on each element of list l
+;; Example: (map abs '(-1 2 -3)) should produce (1 2 3)
+;; Definition:
+(define (map f l)
+  (if (null? l) '() (cons (f (car l)) (map f (cdr l)))))
+</pre>
+</p>
+
+<p>
+The above contract states that <tt>map</tt> consumes 2 arguments: the first argument 
+is a function that takes a value of type <tt>a</tt> and returns a value 
+of type <tt>b</tt>, and the second argument is a list whose elements are 
+of type <tt>a</tt>. Function <tt>map</tt> returns a list whose elements are of type <tt>b</tt>. 
+Here <tt>a</tt> and <tt>b</tt> to denote type variables that can be 
+instantiated to arbitrary concrete types. Note however that <tt>a</tt> 
+and <tt>b</tt> link the arguments and return type of map: function <tt>f</tt> 
+takes a type <tt>a</tt>, and therefore the list l must consists of elements 
+of type <tt>a</tt>, as <tt>f</tt> is applied on each element of <tt>l</tt>; 
+furthermore, the return value must be a list with elements of type <tt>b</tt>.
+</p>
+
+<p>Function <tt>foldl</tt> (another higher-order polymorphic function):</p>
+
+<p>
+<pre>
+;; Contract: foldl : (b * a -> b) * (list a) * b -> b
+;; Purpose: to fold (i.e., reduce) the list l into a single value
+;; Example: (foldl + '(1 2 3) 0) should produce 6
+;; Definition:
+(define (foldl op l id)
+  (if (null? l) id (foldl op (cdr l) (op id (car l)))))
+</pre>
+</p>
+
+<h2 id="errata">Errata</h2>
+
+<p> None yet. Check the Announcements page regularly.</p>
+
+
+<div class="footer"></div>
+
+</body>
+</html>
+
+
